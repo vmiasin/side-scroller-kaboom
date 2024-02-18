@@ -3,6 +3,7 @@
 
 const gameScene = (k) =>
   k.scene("game", () => {
+    let lives = 8;
     let score = 0;
 
     let planeSpeedHorizontal = 480;
@@ -20,13 +21,18 @@ const gameScene = (k) =>
     k.onKeyDown("up", () =>
       player.pos.y >= 0 ? player.move(0, -planeSpeedVertical) : null
     );
+
     k.onKeyDown("down", () =>
       player.pos.y + player.height * 0.4 <= k.height()
         ? player.move(0, planeSpeedVertical)
         : null
     );
 
-    const scoreText = k.add([k.text(0)]);
+    k.add([k.text("Жизней:"), pos(20, 20)]);
+    const livesText = k.add([k.text(lives), pos(20, 50)]);
+
+    k.add([k.text("Счет:"), pos(20, 80)]);
+    const scoreText = k.add([k.text(score), pos(20, 110)]);
 
     const spawnCloud = () => {
       k.add([
@@ -58,25 +64,27 @@ const gameScene = (k) =>
 
     player.onCollide("cloud", (cloud) => {
       cloud.destroy();
-      const newScore = score - 10;
+      const newLives = lives - 1;
 
-      if (newScore <= 0) {
-        k.go("lose");
+      if (newLives <= 0) {
+        k.go("lose", score);
       }
 
-      score = newScore;
-      scoreText.text = newScore;
+      lives = newLives;
+      livesText.text = newLives;
     });
 
     player.onCollide("gift", (gift) => {
       gift.destroy();
-      const newScore = score + 20;
+      const newScore = score + 10;
       score = newScore;
       scoreText.text = newScore;
 
       const isSpeedIncrease = k.rand() < 0.2;
       if (isSpeedIncrease) planeSpeedHorizontal += 30;
     });
+
+    k.onKeyDown("escape", () => k.go("start"));
   });
 
 export default gameScene;
